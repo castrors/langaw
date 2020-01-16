@@ -16,6 +16,7 @@ class BGM {
   static List<AudioCache> _tracks = List<AudioCache>();
   static int _currentTrack = -1;
   static bool _isPlaying = false;
+  static double _volume = 0.25;
 
   static _BGMWidgetsBindingObserver _bgmwbo;
 
@@ -36,7 +37,7 @@ class BGM {
     }
 
     if (_isPlaying) {
-      await _tracks[_currentTrack].fixedPlayer.setVolume(0.25);
+      await _tracks[_currentTrack].fixedPlayer.setVolume(_volume);
       await _tracks[_currentTrack].fixedPlayer.resume();
     } else {
       await _tracks[_currentTrack].fixedPlayer.pause();
@@ -108,5 +109,9 @@ class BGM {
   static void resume() {
     _isPlaying = true;
     _update();
+  }
+
+  static void setVolume(double volume) {
+    _volume = volume;
   }
 }

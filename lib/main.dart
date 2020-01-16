@@ -38,6 +38,10 @@ void main() async {
     'ui/icon-help.png',
     'ui/start-button.png',
     'ui/callout.png',
+    'ui/icon-music-disabled.png',
+    'ui/icon-music-enabled.png',
+    'ui/icon-sound-disabled.png',
+    'ui/icon-sound-enabled.png',
   ]);
 
   Flame.audio.disableLog();

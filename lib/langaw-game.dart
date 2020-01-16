@@ -14,7 +14,9 @@ import 'package:langaw/components/highscore-display.dart';
 import 'package:langaw/components/house-fly.dart';
 import 'package:langaw/components/hungry-fly.dart';
 import 'package:langaw/components/macho-fly.dart';
+import 'package:langaw/components/music-button.dart';
 import 'package:langaw/components/score-display.dart';
+import 'package:langaw/components/sound-button.dart';
 import 'package:langaw/components/start-button.dart';
 import 'package:langaw/controllers/spawner.dart';
 import 'package:langaw/view.dart';
@@ -47,6 +49,8 @@ class LangawGame extends Game {
   HighscoreDisplay highscoreDisplay;
   AudioPlayer homeBGM;
   AudioPlayer playingBGM;
+  MusicButton musicButton;
+  SoundButton soundButton;
 
   LangawGame(this.storage) {
     initialize();
@@ -68,6 +72,8 @@ class LangawGame extends Game {
     spawner = FlySpawner(this);
     scoreDisplay = ScoreDisplay(this);
     highscoreDisplay = HighscoreDisplay(this);
+    musicButton = MusicButton(this);
+    soundButton = SoundButton(this);
 
     score = 0;
 
@@ -110,6 +116,8 @@ class LangawGame extends Game {
   void render(Canvas canvas) {
     background.render(canvas);
     highscoreDisplay.render(canvas);
+    musicButton.render(canvas);
+    soundButton.render(canvas);
 
     flies.forEach((Fly fly) => fly.render(canvas));
 
@@ -184,10 +192,25 @@ class LangawGame extends Game {
         }
       });
       if (activeView == View.playing && !didHitAFly) {
-        Flame.audio.play('sfx/haha' + (rnd.nextInt(5) + 1).toString() + '.ogg');
+        if (soundButton.isEnabled) {
+          Flame.audio
+              .play('sfx/haha' + (rnd.nextInt(5) + 1).toString() + '.ogg');
+        }
         activeView = View.lost;
         playHomeBGM();
       }
+    }
+
+    // music button
+    if (!isHandled && musicButton.rect.contains(d.globalPosition)) {
+      musicButton.onTapDown();
+      isHandled = true;
+    }
+
+    // sound button
+    if (!isHandled && soundButton.rect.contains(d.globalPosition)) {
+      soundButton.onTapDown();
+      isHandled = true;
     }
   }
 }

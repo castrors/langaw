@@ -45,6 +45,10 @@ flutter:
     - assets/images/ui/icon-help.png
     - assets/images/ui/start-button.png
     - assets/images/ui/callout.png
+    - assets/images/ui/icon-music-disabled.png
+    - assets/images/ui/icon-music-enabled.png
+    - assets/images/ui/icon-sound-disabled.png
+    - assets/images/ui/icon-sound-enabled.png
     - assets/audio/sfx/haha1.ogg
     - assets/audio/sfx/haha2.ogg
     - assets/audio/sfx/haha3.ogg
