@@ -1,7 +1,10 @@
 import 'dart:ui';
 
+import 'package:flame/flame.dart';
 import 'package:flame/sprite.dart';
+import 'package:langaw/components/callout.dart';
 import 'package:langaw/langaw-game.dart';
+import 'package:langaw/view.dart';
 
 class Fly {
   final LangawGame game;
@@ -12,11 +15,13 @@ class Fly {
   bool isDead = false;
   bool isOffScreen = false;
   Offset targetLocation;
+  Callout callout;
 
   double get speed => game.tileSize * 3;
 
   Fly(this.game) {
     setTargetLocation();
+    callout = Callout(this);
   }
 
   void setTargetLocation() {
@@ -32,47 +37,56 @@ class Fly {
       deadSprite.renderRect(c, flyRect.inflate(2));
     } else {
       flyingSprite[flyingSpriteIndex.toInt()].renderRect(c, flyRect.inflate(2));
+      if (game.activeView == View.playing) {
+        callout.render(c);
+      }
     }
   }
 
   void update(double t) {
     if (isDead) {
-      makeTheSkyFall(t);
+      // make the fly fall
+      flyRect = flyRect.translate(0, game.tileSize * 12 * t);
+      if (flyRect.top > game.screenSize.height) {
+        isOffScreen = true;
+      }
     } else {
-      flapTheWings(t);
-      moveTheFly(t);
+      // flap the wings
+      flyingSpriteIndex += 30 * t;
+      if (flyingSpriteIndex >= 2) {
+        flyingSpriteIndex -= 2;
+      }
+
+      // move the fly
+      double stepDistance = speed * t;
+      Offset toTarget = targetLocation - Offset(flyRect.left, flyRect.top);
+      if (stepDistance < toTarget.distance) {
+        Offset stepToTarget =
+            Offset.fromDirection(toTarget.direction, stepDistance);
+        flyRect = flyRect.shift(stepToTarget);
+      } else {
+        flyRect = flyRect.shift(toTarget);
+        setTargetLocation();
+      }
+
+      // callout
+      callout.update(t);
     }
   }
 
   void onTapDown() {
-    isDead = true;
-    game.spawnFly();
-  }
+    if (!isDead) {
+      Flame.audio
+          .play('sfx/ouch' + (game.rnd.nextInt(11) + 1).toString() + '.ogg');
+      isDead = true;
 
-  void makeTheSkyFall(t) {
-    flyRect = flyRect.translate(0, game.tileSize * 12 * t);
-    if (flyRect.top > game.screenSize.height) {
-      isOffScreen = true;
-    }
-  }
-
-  void flapTheWings(t) {
-    flyingSpriteIndex += 30 * t;
-    if (flyingSpriteIndex >= 2) {
-      flyingSpriteIndex -= 2;
-    }
-  }
-
-  void moveTheFly(t) {
-    double stepDistance = speed * t;
-    Offset toTarget = targetLocation - Offset(flyRect.left, flyRect.top);
-    if (stepDistance < toTarget.distance) {
-      Offset stepToTarget =
-          Offset.fromDirection(toTarget.direction, stepDistance);
-      flyRect = flyRect.shift(stepToTarget);
-    } else {
-      flyRect = flyRect.shift(toTarget);
-      setTargetLocation();
+      if (game.activeView == View.playing) {
+        game.score += 1;
+        if (game.score > (game.storage.getInt('highscore') ?? 0)) {
+          game.storage.setInt('highscore', game.score);
+          game.highscoreDisplay.updateHighscore();
+        }
+      }
     }
   }
 }
